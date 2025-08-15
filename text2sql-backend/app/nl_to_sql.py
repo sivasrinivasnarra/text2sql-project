@@ -14,26 +14,56 @@ class NLToSQLConverter:
         for table_name in self.schema.keys():
             mappings[table_name.lower()] = table_name
             
-            if table_name.lower() == "employees":
+            if table_name.lower() == "customers":
+                mappings.update({
+                    "customer": table_name,
+                    "client": table_name,
+                    "account_holder": table_name,
+                    "user": table_name,
+                    "person": table_name,
+                    "people": table_name
+                })
+            elif table_name.lower() == "accounts":
+                mappings.update({
+                    "account": table_name,
+                    "bank_account": table_name,
+                    "banking_account": table_name
+                })
+            elif table_name.lower() == "transactions":
+                mappings.update({
+                    "transaction": table_name,
+                    "txn": table_name,
+                    "payment": table_name,
+                    "transfer": table_name,
+                    "activity": table_name
+                })
+            elif table_name.lower() == "loans":
+                mappings.update({
+                    "loan": table_name,
+                    "credit": table_name,
+                    "lending": table_name,
+                    "borrowing": table_name
+                })
+            elif table_name.lower() == "employees":
                 mappings.update({
                     "employee": table_name,
                     "staff": table_name,
                     "worker": table_name,
-                    "people": table_name,
-                    "person": table_name
+                    "banker": table_name,
+                    "teller": table_name
                 })
-            elif table_name.lower() == "departments":
+            elif table_name.lower() == "branches":
                 mappings.update({
-                    "department": table_name,
-                    "dept": table_name,
-                    "division": table_name,
-                    "team": table_name
+                    "branch": table_name,
+                    "office": table_name,
+                    "location": table_name,
+                    "bank_branch": table_name
                 })
-            elif table_name.lower() == "projects":
+            elif table_name.lower() == "credit_cards":
                 mappings.update({
-                    "project": table_name,
-                    "initiative": table_name,
-                    "task": table_name
+                    "credit_card": table_name,
+                    "card": table_name,
+                    "credit": table_name
                 })
         
         return mappings
@@ -48,21 +78,33 @@ class NLToSQLConverter:
                 col_name = column["name"]
                 mappings[table_name][col_name.lower()] = col_name
                 
-                if col_name.lower() in ["name", "title"]:
+                if col_name.lower() in ["first_name", "last_name", "name"]:
                     mappings[table_name]["called"] = col_name
                     mappings[table_name]["named"] = col_name
-                elif col_name.lower() == "salary":
-                    mappings[table_name]["pay"] = col_name
-                    mappings[table_name]["wage"] = col_name
-                    mappings[table_name]["income"] = col_name
-                    mappings[table_name]["earning"] = col_name
-                elif col_name.lower() == "hire_date":
-                    mappings[table_name]["hired"] = col_name
-                    mappings[table_name]["joined"] = col_name
+                elif col_name.lower() == "balance":
+                    mappings[table_name]["money"] = col_name
+                    mappings[table_name]["funds"] = col_name
+                    mappings[table_name]["amount"] = col_name
+                elif col_name.lower() == "amount":
+                    mappings[table_name]["value"] = col_name
+                    mappings[table_name]["sum"] = col_name
+                    mappings[table_name]["total"] = col_name
+                elif col_name.lower() == "credit_limit":
+                    mappings[table_name]["limit"] = col_name
+                    mappings[table_name]["credit"] = col_name
+                elif col_name.lower() == "interest_rate":
+                    mappings[table_name]["rate"] = col_name
+                    mappings[table_name]["interest"] = col_name
+                elif col_name.lower() in ["open_date", "issue_date", "start_date"]:
+                    mappings[table_name]["opened"] = col_name
+                    mappings[table_name]["created"] = col_name
                     mappings[table_name]["started"] = col_name
-                elif col_name.lower() == "position":
+                elif col_name.lower() in ["txn_date", "withdrawal_date", "payment_date"]:
+                    mappings[table_name]["date"] = col_name
+                    mappings[table_name]["when"] = col_name
+                elif col_name.lower() == "role":
                     mappings[table_name]["job"] = col_name
-                    mappings[table_name]["role"] = col_name
+                    mappings[table_name]["position"] = col_name
                     mappings[table_name]["title"] = col_name
         
         return mappings
@@ -117,6 +159,9 @@ class NLToSQLConverter:
     
     def _identify_main_table(self, query: str) -> Optional[str]:
         """Identify the main table from the query"""
+        if any(word in query for word in ["customer", "client", "people"]) and any(word in query for word in ["account", "savings", "checking"]):
+            return "customers"
+        
         for term, table in self.table_mappings.items():
             if term in query:
                 return table
@@ -138,12 +183,29 @@ class NLToSQLConverter:
         """Build FROM clause with necessary JOINs"""
         from_clause = main_table
         
-        if main_table == "employees":
-            if any(word in query for word in ["department", "dept"]):
-                from_clause += " e JOIN departments d ON e.department_id = d.id"
-        elif main_table == "projects":
-            if any(word in query for word in ["department", "dept"]):
-                from_clause += " p JOIN departments d ON p.department_id = d.id"
+        if main_table == "customers":
+            if any(word in query for word in ["account", "savings", "checking", "balance"]):
+                from_clause += " c JOIN accounts a ON c.customer_id = a.customer_id"
+                if any(word in query for word in ["savings", "checking", "business", "joint", "account_type", "type"]):
+                    from_clause += " JOIN account_types at ON a.account_type_id = at.account_type_id"
+        elif main_table == "accounts":
+            if any(word in query for word in ["customer", "client", "name"]):
+                from_clause += " a JOIN customers c ON a.customer_id = c.customer_id"
+            if any(word in query for word in ["branch", "office", "location"]):
+                from_clause += " a JOIN branches b ON a.branch_id = b.branch_id"
+            if any(word in query for word in ["account_type", "type"]):
+                from_clause += " a JOIN account_types at ON a.account_type_id = at.account_type_id"
+        elif main_table == "transactions":
+            if any(word in query for word in ["customer", "client", "account"]):
+                from_clause += " t JOIN accounts a ON t.account_id = a.account_id JOIN customers c ON a.customer_id = c.customer_id"
+        elif main_table == "loans":
+            if any(word in query for word in ["customer", "client", "name"]):
+                from_clause += " l JOIN customers c ON l.customer_id = c.customer_id"
+            if any(word in query for word in ["loan_type", "type"]):
+                from_clause += " l JOIN loan_types lt ON l.loan_type_id = lt.loan_type_id"
+        elif main_table == "employees":
+            if any(word in query for word in ["branch", "office", "location"]):
+                from_clause += " e JOIN branches b ON e.branch_id = b.branch_id"
         
         return from_clause
     
@@ -151,51 +213,92 @@ class NLToSQLConverter:
         """Build WHERE clause from conditions in the query"""
         conditions = []
         
-        salary_match = re.search(r'(over|above|more than|greater than)\s*\$?(\d+)k?', query)
-        if salary_match:
-            amount = int(salary_match.group(2))
-            if 'k' in salary_match.group(0) or amount < 1000:
+        amount_match = re.search(r'(over|above|more than|greater than)\s*\$?(\d+)k?', query)
+        if amount_match:
+            amount = int(amount_match.group(2))
+            if 'k' in amount_match.group(0) or amount < 1000:
                 amount *= 1000
-            conditions.append(f"salary > {amount}")
+            if "balance" in query or "account" in query:
+                conditions.append(f"balance > {amount}")
+            elif "amount" in query or "transaction" in query:
+                conditions.append(f"amount > {amount}")
+            elif "credit" in query or "limit" in query:
+                conditions.append(f"credit_limit > {amount}")
         
-        salary_match = re.search(r'(under|below|less than)\s*\$?(\d+)k?', query)
-        if salary_match:
-            amount = int(salary_match.group(2))
-            if 'k' in salary_match.group(0) or amount < 1000:
+        amount_match = re.search(r'(under|below|less than)\s*\$?(\d+)k?', query)
+        if amount_match:
+            amount = int(amount_match.group(2))
+            if 'k' in amount_match.group(0) or amount < 1000:
                 amount *= 1000
-            conditions.append(f"salary < {amount}")
+            if "balance" in query or "account" in query:
+                conditions.append(f"balance < {amount}")
+            elif "amount" in query or "transaction" in query:
+                conditions.append(f"amount < {amount}")
+            elif "credit" in query or "limit" in query:
+                conditions.append(f"credit_limit < {amount}")
         
         date_match = re.search(r'(after|since)\s*(\d{4})', query)
         if date_match:
             year = date_match.group(2)
-            conditions.append(f"hire_date > '{year}-01-01'")
+            if "open" in query or "account" in query:
+                conditions.append(f"open_date > '{year}-01-01'")
+            elif "transaction" in query:
+                conditions.append(f"txn_date > '{year}-01-01'")
+            elif "loan" in query:
+                conditions.append(f"start_date > '{year}-01-01'")
         
         date_match = re.search(r'(before)\s*(\d{4})', query)
         if date_match:
             year = date_match.group(2)
-            conditions.append(f"hire_date < '{year}-01-01'")
+            if "open" in query or "account" in query:
+                conditions.append(f"open_date < '{year}-01-01'")
+            elif "transaction" in query:
+                conditions.append(f"txn_date < '{year}-01-01'")
+            elif "loan" in query:
+                conditions.append(f"start_date < '{year}-01-01'")
         
-        dept_match = re.search(r'in\s+(engineering|marketing|hr|human resources|finance)', query)
-        if dept_match:
-            dept_name = dept_match.group(1)
-            if dept_name in ["hr", "human resources"]:
-                dept_name = "Human Resources"
-            else:
-                dept_name = dept_name.capitalize()
-            conditions.append(f"department_id = (SELECT id FROM departments WHERE name = '{dept_name}')")
+        account_type_match = re.search(r'(savings|checking|business|joint)', query)
+        if account_type_match:
+            account_type = account_type_match.group(1).capitalize()
+            conditions.append(f"at.account_type = '{account_type}'")
+        
+        if "credit" in query and "transaction" in query:
+            conditions.append("txn_type = 'credit'")
+        elif "debit" in query and "transaction" in query:
+            conditions.append("txn_type = 'debit'")
         
         return " AND ".join(conditions) if conditions else None
     
     def _build_order_clause(self, query: str, main_table: str) -> Optional[str]:
         """Build ORDER BY clause"""
-        if "highest" in query and "salary" in query:
-            return "salary DESC"
-        elif "lowest" in query and "salary" in query:
-            return "salary ASC"
+        if "highest" in query:
+            if "balance" in query:
+                return "balance DESC"
+            elif "amount" in query:
+                return "amount DESC"
+            elif "credit" in query:
+                return "credit_limit DESC"
+        elif "lowest" in query:
+            if "balance" in query:
+                return "balance ASC"
+            elif "amount" in query:
+                return "amount ASC"
+            elif "credit" in query:
+                return "credit_limit ASC"
         elif "newest" in query or "recent" in query:
-            return "hire_date DESC"
+            if main_table == "accounts":
+                return "open_date DESC"
+            elif main_table == "transactions":
+                return "txn_date DESC"
+            elif main_table == "loans":
+                return "start_date DESC"
         elif "oldest" in query:
-            return "hire_date ASC"
+            if main_table == "accounts":
+                return "open_date ASC"
+            elif main_table == "transactions":
+                return "txn_date ASC"
+            elif main_table == "loans":
+                return "start_date ASC"
         
         return None
 

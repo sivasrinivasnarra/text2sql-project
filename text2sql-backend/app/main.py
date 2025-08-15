@@ -112,14 +112,16 @@ async def get_sample_queries():
     """Get sample natural language queries for testing"""
     return {
         "queries": [
-            "Show me all employees",
-            "List employees hired after 2018",
-            "Find employees making over $80k",
-            "Show all employees in engineering department",
-            "List projects with their departments",
-            "Find the highest paid employees",
-            "Show employees hired in 2019",
-            "List all departments and their managers"
+            "Show me all customers",
+            "List all accounts with high balances",
+            "Find customers with savings accounts",
+            "Show recent transactions",
+            "List all loans over $50k",
+            "Find customers with credit cards",
+            "Show all employees at branches",
+            "List transactions over $1000",
+            "Find accounts opened after 2020",
+            "Show customers with multiple accounts"
         ],
         "success": True
     }
