@@ -1,0 +1,7 @@
+id,name,description,department_id,start_date,end_date,budget,status
+1,Mobile App Redesign,Complete redesign of the mobile application,1,2023-01-15,2023-06-30,150000,Completed
+2,Marketing Campaign Q2,Social media and digital marketing campaign,2,2023-04-01,2023-06-30,75000,Completed
+3,HR System Upgrade,Upgrade to new HRIS platform,3,2023-03-01,2023-09-30,120000,In Progress
+4,Financial Audit 2023,Annual financial audit and compliance review,4,2023-01-01,2023-12-31,50000,In Progress
+5,E-commerce Platform,New online sales platform development,1,2023-07-01,2024-02-29,300000,In Progress
+6,Brand Refresh,Company rebranding initiative,2,2023-08-15,2024-01-31,100000,Planning

@@ -1,0 +1,11 @@
+id,name,email,department_id,salary,hire_date,position
+1,John Smith,john.smith@company.com,1,75000,2019-03-15,Software Engineer
+2,Sarah Johnson,sarah.johnson@company.com,1,85000,2018-07-22,Senior Software Engineer
+3,Mike Davis,mike.davis@company.com,2,65000,2020-01-10,Marketing Specialist
+4,Emily Brown,emily.brown@company.com,2,70000,2019-11-05,Marketing Manager
+5,David Wilson,david.wilson@company.com,3,90000,2017-09-12,HR Director
+6,Lisa Anderson,lisa.anderson@company.com,1,95000,2016-05-18,Tech Lead
+7,James Taylor,james.taylor@company.com,3,60000,2021-02-28,HR Coordinator
+8,Jennifer White,jennifer.white@company.com,2,72000,2018-12-03,Senior Marketing Specialist
+9,Robert Garcia,robert.garcia@company.com,1,82000,2019-08-14,Senior Software Engineer
+10,Maria Rodriguez,maria.rodriguez@company.com,4,88000,2020-06-01,Finance Manager
