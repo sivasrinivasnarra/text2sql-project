@@ -166,7 +166,7 @@ function App() {
               <Input
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="e.g., Show me all employees hired after 2018 making over $80k"
+                placeholder="e.g., Show me all customers with savings accounts"
                 className="flex-1"
                 onKeyPress={(e) => e.key === 'Enter' && handleQuery()}
               />
